@@ -1,3 +1,5 @@
+% This file contains global setup commands so that we can write in our main document without cluttering up the workspace. This file is the first thing included in the main paper after the \documentclass command, and all settings are immediately available.
+
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{parskip}
@@ -9,8 +11,6 @@
 \setmainfont{Open Sans}
 \newfontfamily \headingfont[]{Open Sans Light}
 \newfontfamily \codefont[NFSSFamily=JetBrainsMono]{JetBrains Mono}
-%\titleformat*{\section}
-%	{\Huge\headingfont}
 \definecolor{accent}{rgb}{0.8, 0.0, 0.0}
 \titleformat{\section}
 	{\Huge\headingfont}{\thesection}{1em}{}[{\color{accent}\titlerule[4pt]}]
@@ -25,7 +25,13 @@
 % Link settings
 \usepackage{hyperref}
 \definecolor{linkcolour}{rgb}{0.7, 0.133, 0.133}
-\hypersetup{colorlinks,breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
+\hypersetup{
+	colorlinks,
+	breaklinks,
+	urlcolor=linkcolour,
+	linkcolor=linkcolour,
+	citecolor=linkcolour
+}
 
 % Code settings
 \usepackage{minted}
@@ -62,3 +68,12 @@
 	\normalfont
 	\normalsize
 }
+
+% Bibiliography settings
+\usepackage[
+	backend=bibtex,
+	style=numeric,
+	natbib=true,
+	autocite=superscript
+]{biblatex}
+\addbibresource{sources.bib}

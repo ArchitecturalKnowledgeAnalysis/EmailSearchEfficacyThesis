@@ -1,6 +1,12 @@
+# Various LaTeX files.
 *.aux
 *.log
 *.out
 *.synctex.gz
 *.toc
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*-blx.bib
 /_minted-thesis

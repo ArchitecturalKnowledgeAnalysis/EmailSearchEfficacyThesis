@@ -1,51 +1,54 @@
 \documentclass[a4paper, 12pt]{article}
 
-% Font settings
-\usepackage{fontspec}
-\usepackage{titlesec}
-\usepackage{titling}
-\setmainfont{Open Sans}
-\newfontfamily \headingfont[]{Open Sans Light}
-\newfontfamily \codefont[NFSSFamily=JetBrainsMono]{JetBrains Mono}
-\titleformat*{\section}{\LARGE\headingfont}
-\titleformat*{\subsection}{\Large\headingfont}
-\titleformat*{\subsubsection}{\large\headingfont}
+\input{setup.tex}
 
-% Link settings
-\usepackage{xcolor}
-\usepackage{hyperref}
-\definecolor{linkcolour}{rgb}{0,0.2,0.6}
-\hypersetup{colorlinks,breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
-
-% Code settings
-\usepackage{minted}
-\usemintedstyle{native}
-\definecolor{codebg}{rgb}{0.1254, 0.1254, 0.1254}
-\definecolor{codehighlight}{rgb}{0.360, 0.215, 0.309}
-\setminted{
-	autogobble=true,
-	encoding=utf-8,
-	numbers=left,
-	bgcolor=codebg,
-	highlightcolor=codehighlight,
-	fontfamily=JetBrainsMono,
-	fontsize=\footnotesize,
-	breaklines,
-}
-
-% Set the title to use the main font.
-\pretitle{\LARGE\headingfont}
-\title{On the Efficacy of Keyword Searches to Find Meaningful Architectural Knowledge in Open-Source Software Mailing Lists}
-\posttitle{}
-\date{2022}
-\author{Andrew Lalis | S3050831\\Supervisor: Mohamed Soliman}
+\setcounter{secnumdepth}{-3}
 
 \begin{document}
 
-\maketitle
+\input{title-page.tex}
 
-\section{First}
+\section{Abstract}
+	This section will contain a brief overview of the research and conclusions.
 
-\section{Second}
+\input{table-of-contents.tex}
+
+\section{Introduction}
+	In this paper, we'll explore the efficacy of using targeted keyword search queries to find architectural knowledge in mailing lists for open-source software projects. More simply put, we'll build tools, collect data, and analyze that data to qualitatively determine how effective certain keyword-based search queries are at finding useful information in large sets of emails.
+	
+	\subsection{Background}
+		Test
+		
+		\subsubsection{Other}
+			test!
+
+\section{Background Information}
+	This section contains some background information about what research already exists on this topic, and what knowledge it provides.
+
+\section{Research Questions}
+	The main research question that this paper attempts to answer is summarized in the following question:
+	
+	\begin{center}
+		\large What is the effectiveness of using keyword search queries to find architectural knowledge in open-source software mailing lists?
+	\end{center}
+	
+	In addition to the main question we're attempting to answer, this paper will also discuss several other possible questions and answers that may be obtained using the data originally gathered for the main question.
+	
+	\begin{enumerate}
+		\item Does there exist a relationship in the order in which architectural decisions are discussed, chronologically in an email thread? Is there significance in the order in which architectural decisions are made?
+		
+		\item Is there a relationship between the content of discussion in emails, and related issues in issue/ticket boards such as \href{https://www.atlassian.com/software/jira}{JIRA} and \href{https://github.com/features/issues}{GitHub issues}?
+		
+		\item How can we use data gathered in this research to improve our search queries?
+	\end{enumerate}
+
+\section{Methodology}
+	This section will explain the process that was followed to obtain data.
+
+\section{Results}
+	This section will show visualizations and aggregate data for results.
+
+\section{Conclusion}
+	This section will answer the research questions and discuss further research.
 
 \end{document}

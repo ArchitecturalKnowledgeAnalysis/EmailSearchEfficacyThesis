@@ -1,0 +1,64 @@
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{parskip}
+
+% Font settings
+\usepackage{fontspec}
+\usepackage{titlesec}
+\usepackage{titling}
+\setmainfont{Open Sans}
+\newfontfamily \headingfont[]{Open Sans Light}
+\newfontfamily \codefont[NFSSFamily=JetBrainsMono]{JetBrains Mono}
+%\titleformat*{\section}
+%	{\Huge\headingfont}
+\definecolor{accent}{rgb}{0.8, 0.0, 0.0}
+\titleformat{\section}
+	{\Huge\headingfont}{\thesection}{1em}{}[{\color{accent}\titlerule[4pt]}]
+\titleformat{\subsection}
+	{\Large\headingfont}{\thesection}{1em}{}[{\color{accent}\titlerule[2pt]}]
+\titleformat{\subsubsection}
+	{\large\headingfont}{\thesection}{1em}{}[{\color{accent}\titlerule[1pt]}]
+% Set to clear page before each section.
+\newcommand{\sectionbreak}{\clearpage}
+
+
+% Link settings
+\usepackage{hyperref}
+\definecolor{linkcolour}{rgb}{0.7, 0.133, 0.133}
+\hypersetup{colorlinks,breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
+
+% Code settings
+\usepackage{minted}
+\usemintedstyle{native}
+\definecolor{codebg}{rgb}{0.1254, 0.1254, 0.1254}
+\definecolor{codehighlight}{rgb}{0.360, 0.215, 0.309}
+\setminted{
+	autogobble=true,
+	encoding=utf-8,
+	numbers=left,
+	bgcolor=codebg,
+	highlightcolor=codehighlight,
+	fontfamily=JetBrainsMono,
+	fontsize=\footnotesize,
+	breaklines,
+}
+
+% Header/Footer settings
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage[left=3cm, right=3cm, top=2cm, bottom=4cm]{geometry}
+\pagestyle{fancy}
+\fancyhead[L,C,R]{}
+\renewcommand{\headrulewidth}{0pt}
+% Footer definition
+\fancyfoot[L]{
+	\includegraphics[width=2cm]{img/rug_icon.jpg}
+}
+\fancyfoot[C]{}
+\fancyfoot[R]{
+	\headingfont
+	\large
+	Page \thepage\ of \pageref*{LastPage}
+	\normalfont
+	\normalsize
+}

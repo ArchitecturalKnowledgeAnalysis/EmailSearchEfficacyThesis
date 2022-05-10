@@ -6,6 +6,7 @@
 \usepackage{titling}
 \setmainfont{Open Sans}
 \newfontfamily \headingfont[]{Open Sans Light}
+\newfontfamily \codefont[NFSSFamily=JetBrainsMono]{JetBrains Mono}
 \titleformat*{\section}{\LARGE\headingfont}
 \titleformat*{\subsection}{\Large\headingfont}
 \titleformat*{\subsubsection}{\large\headingfont}
@@ -15,6 +16,22 @@
 \usepackage{hyperref}
 \definecolor{linkcolour}{rgb}{0,0.2,0.6}
 \hypersetup{colorlinks,breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
+
+% Code settings
+\usepackage{minted}
+\usemintedstyle{native}
+\definecolor{codebg}{rgb}{0.1254, 0.1254, 0.1254}
+\definecolor{codehighlight}{rgb}{0.360, 0.215, 0.309}
+\setminted{
+	autogobble=true,
+	encoding=utf-8,
+	numbers=left,
+	bgcolor=codebg,
+	highlightcolor=codehighlight,
+	fontfamily=JetBrainsMono,
+	fontsize=\footnotesize,
+	breaklines,
+}
 
 % Set the title to use the main font.
 \pretitle{\LARGE\headingfont}
@@ -28,7 +45,6 @@
 \maketitle
 
 \section{First}
-	This is some text
 
 \section{Second}
 

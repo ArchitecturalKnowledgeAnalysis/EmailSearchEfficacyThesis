@@ -1,0 +1,35 @@
+\documentclass[a4paper, 12pt]{article}
+
+% Font settings
+\usepackage{fontspec}
+\usepackage{titlesec}
+\usepackage{titling}
+\setmainfont{Open Sans}
+\newfontfamily \headingfont[]{Open Sans Light}
+\titleformat*{\section}{\LARGE\headingfont}
+\titleformat*{\subsection}{\Large\headingfont}
+\titleformat*{\subsubsection}{\large\headingfont}
+
+% Link settings
+\usepackage{xcolor}
+\usepackage{hyperref}
+\definecolor{linkcolour}{rgb}{0,0.2,0.6}
+\hypersetup{colorlinks,breaklinks,urlcolor=linkcolour, linkcolor=linkcolour}
+
+% Set the title to use the main font.
+\pretitle{\LARGE\headingfont}
+\title{On the Efficacy of Keyword Searches to Find Meaningful Architectural Knowledge in Open-Source Software Mailing Lists}
+\posttitle{}
+\date{2022}
+\author{Andrew Lalis | S3050831\\Supervisor: Mohamed Soliman}
+
+\begin{document}
+
+\maketitle
+
+\section{First}
+	This is some text
+
+\section{Second}
+
+\end{document}

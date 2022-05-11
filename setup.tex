@@ -35,6 +35,20 @@
 
 % Code settings
 \usepackage{minted}
+
+% Note: For some reason, this patch is needed to allow minted to work with python3, since it just looks for "python" by default.
+\usepackage{xpatch}
+\makeatletter
+\xpatchcmd\minted@pygmentize
+	{python -c}
+	{python3 -c}
+	{}{\fail}
+\xpatchcmd\minted@autogobble
+	{python -c}
+	{python3 -c}
+	{}{\fail}
+\makeatother
+
 \usemintedstyle{native}
 \definecolor{codebg}{rgb}{0.1254, 0.1254, 0.1254}
 \definecolor{codehighlight}{rgb}{0.360, 0.215, 0.309}
@@ -45,9 +59,11 @@
 	bgcolor=codebg,
 	highlightcolor=codehighlight,
 	fontfamily=JetBrainsMono,
-	fontsize=\footnotesize,
+	fontsize=\scriptsize,
 	breaklines,
+	tabsize=2
 }
+\renewcommand{\theFancyVerbLine}{\sffamily{\scriptsize\oldstylenums{\arabic{FancyVerbLine}}}}
 
 % Header/Footer settings
 \usepackage{fancyhdr}

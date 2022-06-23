@@ -1,0 +1,5 @@
+RANK,PATTERN,COUNT,EMAIL_IDS
+1,"[existence, property, technology]",5,"[17569, 23474, 23496, 36636, 39038]"
+2,"[existence, process, property]",4,"[17569, 32832, 36614, 36636]"
+3,"[existence, process, technology]",3,"[17569, 17585, 36636]"
+4,"[process, property, technology]",2,"[17569, 36636]"

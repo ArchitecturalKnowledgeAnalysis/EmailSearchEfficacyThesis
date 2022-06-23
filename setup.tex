@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{parskip}
+\usepackage{wrapfig}
 
 % Font settings
 \usepackage{fontspec}
@@ -18,6 +19,7 @@
 	{\Large\headingfont}{\thesection}{1em}{}[{\color{accent}\titlerule[2pt]}]
 \titleformat{\subsubsection}
 	{\large\headingfont}{\thesection}{1em}{}[{\color{accent}\titlerule[1pt]}]
+\setmonofont{JetBrains Mono}
 % Set to clear page before each section.
 \newcommand{\sectionbreak}{\clearpage}
 
@@ -48,8 +50,8 @@
 	{}{\fail}
 \makeatother
 
-\usemintedstyle{native}
-\definecolor{codebg}{rgb}{0.1254, 0.1254, 0.1254}
+\usemintedstyle{default}
+\definecolor{codebg}{rgb}{0.973, 0.973, 0.973}
 \definecolor{codehighlight}{rgb}{0.360, 0.215, 0.309}
 \setminted{
 	autogobble=true,

@@ -1,0 +1,25 @@
+RANK,PATTERN,COUNT,SEQUENCES
+1,"[property, existence, process]",4,"[[36614, 36636, 36638], [36636, 36638, 36639], [34165, 34168, 34186], [12787, 12805, 12810]]"
+2,"[existence, property, technology]",3,"[[28985, 28986, 29006], [23384, 23395, 23399], [23384, 23395, 23403]]"
+3,"[technology, existence, process]",2,"[[36636, 36638, 36639], [17585, 17597, 17600]]"
+4,"[property, technology, existence]",2,"[[42282, 42283, 42289], [36614, 36636, 36638]]"
+5,"[property, technology, process]",2,"[[40787, 40801, 40802], [36614, 36636, 36638]]"
+6,"[property, existence, technology]",2,"[[29579, 29580, 29582], [25084, 25085, 25086]]"
+7,"[existence, property, process]",2,"[[41702, 41704, 41709], [36614, 36636, 36638]]"
+8,"[process, property, existence]",1,"[[36614, 36636, 36638]]"
+9,"[property, process, existence]",1,"[[36614, 36636, 36638]]"
+10,"[process, existence, technology]",1,"[[30934, 30935, 30937]]"
+11,"[existence, process, property]",1,"[[34168, 34186, 34253]]"
+12,"[technology, existence, property]",1,"[[4367, 4370, 4371]]"
+13,"[technology, property, process]",1,"[[39719, 39720, 39721]]"
+14,"[process, property, technology]",1,"[[40786, 40787, 40801]]"
+15,"[process, technology, existence]",1,"[[36614, 36636, 36638]]"
+16,"[existence, technology, process]",1,"[[36614, 36636, 36638]]"
+17,"[property, process, technology]",1,"[[39720, 39721, 39724]]"
+18,"[process, technology, property]",0,[]
+19,"[technology, process, existence]",0,[]
+20,"[existence, technology, property]",0,[]
+21,"[technology, property, existence]",0,[]
+22,"[technology, process, property]",0,[]
+23,"[process, existence, property]",0,[]
+24,"[existence, process, technology]",0,[]

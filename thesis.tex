@@ -18,18 +18,66 @@
 	In this paper, we'll explore the efficacy of using targeted keyword search queries to find architectural knowledge in mailing lists for open-source software projects. More simply put, we'll build tools, collect data, and analyze that data to qualitatively determine how effective certain keyword-based search queries are at finding useful information in large sets of emails, sent in mailing lists for developers to communicate about large open-source software projects.
 	
 	\subsection{Software Architecture}
-		Behind every software system you interact with, including the one used to read this paper, is a set of elements, relationships, and rationale that define the software's architecture. While on the surface, you see the \textit{implementation} of the software, the \textit{architecture} is concerned with what elements, their interactions in order to provide a framework for satisfying the requirements of the system \autocite{perry}. Continuing our example, the software you're using to read this paper probably uses an architecture that includes elements like a PDF renderer, file reader, and a controller to manage your button clicks and mouse scrolling. Collectively, this set of components, design decisions, rationale, assumptions, and context together are defined as the \textit{architectural knowledge} of the system\autocite{denboon}.
+		Behind every software system you interact with, including the one used to read this paper, is a set of elements, relationships, and rationale that define the software's architecture. While on the surface, you see the \textit{implementation} of the software, the \textit{architecture} is concerned with what elements, their interactions in order to provide a framework for satisfying the requirements of the system \cite{perry}. Continuing our example, the software you're using to read this paper probably uses an architecture that includes elements like a PDF renderer, file reader, and a controller to manage your button clicks and mouse scrolling. Collectively, this set of components, design decisions, rationale, assumptions, and context together are defined as the \textit{architectural knowledge} of the system\cite{denboon}.
 		
-		In Perry's 1992 paper, "Foundations for the Study of Software Architecture", he posits that "we have not yet arrived at the stage where we have a standard set of architectural styles with their accompanying design elements and formal arrangements," and that each system is "a new architecture" \autocite{perry}. While we are perhaps nearer now, 30 years later, to that mythical stage of architectural standardization, indeed many new systems are genuinely new architectures, with new elements or entirely novel approaches to communicating between components, where engineers must consult both their acquired skills and the collective knowledge of their peers, to make a best-effort to build a system to satisfy their requirements.
+		In Perry's 1992 paper, "Foundations for the Study of Software Architecture", he posits that "we have not yet arrived at the stage where we have a standard set of architectural styles with their accompanying design elements and formal arrangements," and that each system is "a new architecture" \cite{perry}. While we are perhaps nearer now, 30 years later, to that mythical stage of architectural standardization, indeed many new systems are genuinely new architectures, with new elements or entirely novel approaches to communicating between components, where engineers must consult both their acquired skills and the collective knowledge of their peers, to make a best-effort to build a system to satisfy their requirements.
 		
-		Despite the plethora of resources available to the modern software engineer, we still often see \textit{architectural knowledge vaporization}\autocite{jansen} because of undocumented decisions engineers took when designing the architecture of a system, or because it's impossible or practically infeasible to extract useful information. This dissipation of knowledge is a function of time and architecture size, and can lead to some serious problems that have already established themselves as hallmarks of poor software design in the industry, such as an increasing cost to improve or upgrade a system \autocite{jansen, perry}, and a lack of reusability \autocite{jansen}, and an increased cost of maintenance \autocite{randell} even when no new features are added. These costs can, and often do, reach a point at which it is simply more effective to start over, abandoning completely any established work on an architecture. Through the years, this evolved from reprogramming low-level batch programs for early computing installations\autocite{randell}, to today's distributed systems. Succinctly, a loss of architectural knowledge, by conjecture, leads to a loss of value and a loss of efficiency, and this paper aims to add additional tools to our collective defense against such regression.
+		Despite the plethora of resources available to the modern software engineer, we still often see \textit{architectural knowledge vaporization}\cite{jansen} because of undocumented decisions engineers took when designing the architecture of a system, or because it's impossible or practically infeasible to extract useful information. This dissipation of knowledge is a function of time and architecture size, and can lead to some serious problems that have already established themselves as hallmarks of poor software design in the industry, such as an increasing cost to improve or upgrade a system \cite{jansen, perry}, and a lack of reusability \cite{jansen}, and an increased cost of maintenance \cite{randell} even when no new features are added. These costs can, and often do, reach a point at which it is simply more effective to start over, abandoning completely any established work on an architecture. Through the years, this evolved from reprogramming low-level batch programs for early computing installations\cite{randell}, to today's distributed systems. Succinctly, a loss of architectural knowledge, by conjecture, leads to a loss of value and a loss of efficiency, and this paper aims to add additional tools to our collective defense against such regression.
 		
 	\subsection{Searching}
 		It is important to explore different avenues for acquiring knowledge, especially as the body of information grows exponentially with time. It is difficult for developers and software architects to make informed decisions about their own projects, because the source of their knowledge is distributed in a variety of disparate sources. If we can reliably glean information about software architecture and the successful (and unsuccessful) decisions that other field experts have made, we can make this knowledge more accessible for all.
 		
-		Most people are familiar with "googling" to find solutions to their questions, but Soliman et al. has shown that using web search engines is not effective for mining knowledge from mailing lists\autocite{soliman}. This probably is a symptom of the fact that most search engines do not index emails sent in mailing lists (as it generally doesn't make sense to do so), and that search engines can't provide a friendly user experience for navigating results that would be shown from mailing lists.
+		Most people are familiar with "googling" to find solutions to their questions, but Soliman et al. has shown that using web search engines is not effective for mining knowledge from mailing lists\cite{soliman}. This probably is a symptom of the fact that most search engines do not index emails sent in mailing lists (as it generally doesn't make sense to do so), and that search engines can't provide a friendly user experience for navigating results that would be shown from mailing lists.
 		
-		Therefore, we'll need to index and search over emails independently. Of course, this detaches the research from what the majority of people are doing in their everyday lives, but presents more opportunities for automated architectural knowledge scraping, and as Bhat et al. has shown, an effective machine learning model is well within the realm of possibility\autocite{bhat}.
+		Therefore, we'll need to index and search over emails independently. Of course, this detaches the research from what the majority of people are doing in their everyday lives, but presents more opportunities for automated architectural knowledge scraping, and as Bhat et al. has shown, an effective machine learning model is well within the realm of possibility\cite{bhat}.
+		
+	\subsection{Defining Types of Design Decisions}
+		\label{sec:design-decisions}
+		Before we can begin searching for architectural knowledge in earnest, we must first exhaustively define the types of distinct architectural design decisions that will be categorized.
+		
+		We start by evaluating Kruchten's original set of design decisions in section 2.1 of "Building Up and Reasoning About Architectural Knowledge"\cite{kruchten}, which lists four main kinds of decisions: \textbf{existence}, \textbf{ban}, \textbf{property}, and \textbf{executive}.
+		
+		These decisions were conceived in a domain that must consider architectural knowledge from a large variety of sources, and so we also consult den Boon\cite{denboon} and Faroghi\cite{faroghi} for more information that's specific to open-source issue/ticket boards and mailing lists. From their more specific lists, as well as some cursory categorization attempts, the following architectural design decisions were adopted.
+		
+		\subsubsection{\textbf{Existence}}
+			Existence decisions are those that are concerned with the creation of new elements of a system's conceptual or implementation architecture, or the creation of behavioral connections between existing components. Generally, existence decisions manifest themselves in discussions about whether to add a new component to a system, or to link components together.
+			
+			\textit{Structural} decisions are a subset of existence decisions that focus solely on the creation or modification of components of an architecture; most often the addition of new components to a system.
+			
+			On the other hand, \textit{behavioral} existence decisions are concerned with, well, the behavior of the components of a system, namely how multiple components in a system interact with each other.
+			
+			For example,
+			\begin{itemize}
+				\item The system shall incorporate an additional process manager to orchestrate other high-level tasks.
+				\item The system shall send periodic "heartbeat" packets to connected subsystems.
+			\end{itemize}
+		
+		\subsubsection{\textbf{Property}}
+			This category of design decision is taken almost verbatim from Kruchten's originally proposed list of architectural design decisions\cite{kruchten}, and is defined as one which states an enduring, overarching trait or quality of the system. This is not so much related to any particular element or behavior because they often necessarily affect many components with cross-cutting concerns.
+			
+			For example,
+			\begin{itemize}
+				\item The system shall be able to process at least 10,000 incoming connections concurrently.
+				\item The system shall allow for flexible third-party plugin integration.
+			\end{itemize}
+		
+		\subsubsection{\textbf{Process}}
+			Again, this design decision is taken without much need for revision, from previous papers on the subject. A process decision is concerned less with the architecture itself, and more the internal development process. This includes things like software quality and testing strategies, code review procedures, and enhancement proposal protocols.
+			
+			For example,
+			\begin{itemize}
+				\item We as developers should define a strict suite of tests that must pass in order for any new release to be made available to the public.
+				\item We should create a formal procedure for submitting patch requests.
+			\end{itemize}
+		
+		\subsubsection{\textbf{Technology}}
+			These decisions are made regarding the comparison, evaluation, and choice of third-party technologies for use in or with an architecture. This could be as simple as discussing a choice of programming language, to choosing a set of supported Open-ID Connect API providers for a user authentication micro-service. Generally, an email shall be considered to contain a technology design "decision", even if no discrete decision is made in that email. This is because a large part of technology discussions focuses on evaluating the properties of various alternative solutions, and such discussions have been found in practice to end with a rather simple, abrupt choice based on a vote.
+			
+			For example,
+			\begin{itemize}
+				\item We would like to use the \textit{D} programming language to write startup scripts for the system, because of its flexible syntax and high performance\cite{bright}.
+				\item Our development team should make a choice between using Jira or GitHub Issues for our ticket board. Here are their pros and cons: ...
+			\end{itemize}
 		
 	\newpage
 	\subsection{Research Questions}
@@ -50,19 +98,132 @@
 		\end{enumerate}
 	
 \section{Related Work}
-	In the field of architectural knowledge acquisition (granted, a rather niche field), the work of this research builds directly on the results obtained in den Boon's paper that explored the effectiveness of using the Apache Lucene search engine for finding this knowledge\autocite{denboon}. This research found that Lucene can indeed be used for finding knowledge effectively, and also provided a basis for the \hyperref[sec:queries]{four queries} that this study uses for searching. It also concluded that, when using these queries to search through both issue/ticket boards and mailing lists, that mailing lists were more suitable to finding "macro architectural design decisions".
+	In the field of architectural knowledge acquisition (granted, a rather niche field), the work of this research builds directly on the results obtained in den Boon's paper that explored the effectiveness of using the Apache Lucene search engine for finding this knowledge\cite{denboon}. This research found that Lucene can indeed be used for finding knowledge effectively, and also provided a basis for the \hyperref[sec:queries]{four queries} that this study uses for searching. It also concluded that, when using these queries to search through both issue/ticket boards and mailing lists, that mailing lists were more suitable to finding "macro architectural design decisions".
 	
-	The primary supervisor of this paper, Mohamed Soliman, also prepared a study in 2021 that evaluated the effectiveness of common web search engines (i.e. \href{https://google.com}{Google}) to find architectural knowledge, and from this paper we can learn that there are some key drawbacks to such a "lazy" approach to searching for architectural knowledge using the world's most ubiquitous search engine: design decisions are underrepresented, issue trackers and mailing lists are not indexed by search engines, and that most actual open-source software architecture on websites like \href{https://github.com}{GitHub} is not easily accessed. Furthermore, we see from this paper that while Google \textit{does} make it easy to compare alternative solutions for architectural problems, with blogs and tutorials being the most common result, finding information on instantiating \textit{new architectures} is not as easily accessible. These drawbacks provide motivation to search for alternative, more targeted searches that go beyond Google's general purpose indexing patterns\autocite{soliman}.
+	The primary supervisor of this paper, Mohamed Soliman, also prepared a study in 2021 that evaluated the effectiveness of common web search engines (i.e. \href{https://google.com}{Google}) to find architectural knowledge, and from this paper we can learn that there are some key drawbacks to such a "lazy" approach to searching for architectural knowledge using the world's most ubiquitous search engine: design decisions are underrepresented, issue trackers and mailing lists are not indexed by search engines, and that most actual open-source software architecture on websites like \href{https://github.com}{GitHub} is not easily accessed. Furthermore, we see from this paper that while Google \textit{does} make it easy to compare alternative solutions for architectural problems, with blogs and tutorials being the most common result, finding information on instantiating \textit{new architectures} is not as easily accessible. These drawbacks provide motivation to search for alternative, more targeted searches that go beyond Google's general purpose indexing patterns\cite{soliman}.
 	
-	Xiong et al. worked in 2018 on analyzing the content of open-source \href{https://hibernate.org/}{Hibernate} mailing lists to search for "assumptions regarding requirements, environment, design decisions, etc." and found that the Hibernate developer mailing list contained 832 such relevant results from a sample size of 9006 posts. This provides an indication that developer mailing lists can be a valid source of knowledge about architectural design decisions\autocite{xiong}. As stated in that paper, this study attempts to address the need to "explore the feasibility of this study in other OSS projects". Similar to this, work done by Ding et al. shows definitively that discussions in OSS developer mailing lists \textit{do} lead to measurable changes in the software's architecture, which provides further indication that mailing lists have a high potential for finding legitimate, practical, and usable architectural knowledge\autocite{ding}.
+	Xiong et al. worked in 2018 on analyzing the content of open-source \href{https://hibernate.org/}{Hibernate} mailing lists to search for "assumptions regarding requirements, environment, design decisions, etc." and found that the Hibernate developer mailing list contained 832 such relevant results from a sample size of 9006 posts. This provides an indication that developer mailing lists can be a valid source of knowledge about architectural design decisions\cite{xiong}. As stated in that paper, this study attempts to address the need to "explore the feasibility of this study in other OSS projects". Similar to this, work done by Ding et al. shows definitively that discussions in OSS developer mailing lists \textit{do} lead to measurable changes in the software's architecture, which provides further indication that mailing lists have a high potential for finding legitimate, practical, and usable architectural knowledge\cite{ding}.
 	
-	Kruchten's paper "Building UP and Reasoning About Architectural Knowledge" provided a basis for the \textit{types} of architectural knowledge that this paper will discuss, particularly his discussion on the "Ontology of Design Decisions"\autocite{kruchten}. This information is combined with the research of den Boon\autocite{denboon} and Faroghi\autocite{faroghi} to arrive at the formalized set of design decisions that is discussed in the \hyperref[sec:design-decisions]{Design Decisions} section of the methodology discussion.
+	Kruchten's paper "Building UP and Reasoning About Architectural Knowledge" provided a basis for the \textit{types} of architectural knowledge that this paper will discuss, particularly his discussion on the "Ontology of Design Decisions"\cite{kruchten}. This information is combined with the research of den Boon\cite{denboon} and Faroghi\cite{faroghi} to arrive at the formalized set of design decisions that is discussed in the \hyperref[sec:design-decisions]{Design Decisions} section of the methodology discussion.
 	
-	With regards to the development of the practical tools used for this study, Tang's comparative study of existing architectural management tools\autocite{tang} was a useful indicator of what the current (well, as of 2008) functionalities and expectations are for such tools. However, the different solutions examined under that paper focused mainly on larger-scale commercial ventures, which this study is not. Those tools therefore had a plethora of additional requirements, like privileged access to architectural knowledge and concurrent user content locking. These features, while they can be useful when deployed in a large-scale setting, are not necessary for a simpler passive study of existing knowledge in mailing lists.
+	With regards to the development of the practical tools used for this study, Tang's comparative study of existing architectural management tools\cite{tang} was a useful indicator of what the current (well, as of 2008) functionalities and expectations are for such tools. However, the different solutions examined under that paper focused mainly on larger-scale commercial ventures, which this study is not. Those tools therefore had a plethora of additional requirements, like privileged access to architectural knowledge and concurrent user content locking. These features, while they can be useful when deployed in a large-scale setting, are not necessary for a simpler passive study of existing knowledge in mailing lists.
 	
-	To extend the discussion on tools for extracting knowledge, Bhat et al. managed to produce a machine learning model for the identification and classification of architectural design decisions in OSS issues, and managed to achieve 91.29\% accuracy in detection, and 82.79\% accuracy in classification\autocite{bhat}. Granted, this model applies only to issues and not mailing lists, and mailing lists are generally more verbose, so the applicability of this study's findings to mailing list searching are rather limited. In any case, our study may help to provide data and guidance to future work on developing a machine learning model for the classification of emails, similar to Bhat's study.
+	To extend the discussion on tools for extracting knowledge, Bhat et al. managed to produce a machine learning model for the identification and classification of architectural design decisions in OSS issues, and managed to achieve 91.29\% accuracy in detection, and 82.79\% accuracy in classification\cite{bhat}. Granted, this model applies only to issues and not mailing lists, and mailing lists are generally more verbose, so the applicability of this study's findings to mailing list searching are rather limited. In any case, our study may help to provide data and guidance to future work on developing a machine learning model for the classification of emails, similar to Bhat's study.
+
+\section{Tools}
+	To facilitate the research described in this document, a suite of tools was developed to aid in the fetching, processing, categorization, and analysis of emails from various open-source mailing lists. This section contains a detailed overview of each of these tools, and a high-level overview of the system architecture and how the entire suite can be used from start to finish.
+	
+	\footnotesize
+	If you're not interested these specifics, you may skip ahead to the \hyperref[sec:methodology]{methodology} section.
+	\normalsize
+	
+	The entire collection of tools and their source code is available online at the \href{https://github.com/ArchitecturalKnowledgeAnalysis}{Architectural Knowledge Analysis} GitHub organization. Each of the tools discussed in this section is organized under a separate repository. In general, any projects written in \textit{Java} require the user to have version 17 or greater installed to build the project or run any executables/apps produced by it. \href{https://adoptium.net/temurin/releases}{You can get the latest OpenJDK release here.} Any projects written in \textit{D} should use a fairly recent version of D. The DMD compiler, version 2.099.1, was used to build and run all D projects/scripts. \href{https://dlang.org/download.html}{You can get the latest D compiler here.}
+	
+	Note that, especially for D projects, development was done in a Linux environment, and no serious attempt was made to provide additional compatibility and support for the Windows operating system. Any compatibility is simply a consequence of the cross-platform nature of the technologies used. File path separators, process management, permissions, and other functionalities are handled differently in Windows, thus it is encouraged that you use a Linux-based OS to make use of these tools.
+	
+	\subsection{Overview}
+		While each of the tools described in this section exist as a standalone project that can be incorporated into any third-party application, the majority of these focus on providing auxiliary services to the \hyperref[sec:email-dataset-browser]{Email Dataset Browser} application.
+		
+		The general workflow that these tools enable, is described as follows:
+		
+		\begin{enumerate}
+			\item Raw \texttt{mbox} files (files containing many emails) are downloaded from a mailing list archive's API.
+			\item The mbox files are parsed to extract the individual emails and their metadata, and this is used to build a relational database and Lucene search index.
+			\item A researcher categorizes the emails in the dataset according to a set of pre-defined criteria. In this case, we use the \hyperref[sec:design-decisions]{architectural design decisions} covered in the introduction.
+			\item The categorized emails and Lucene search results are exported from the dataset to a JSON format.
+			\item Analysis is performed on the data and visualizations are generated.
+		\end{enumerate}
+	
+	\subsection{Email Downloader}
+		The email downloader component helps us to solve the first step of the workflow: fetching \texttt{mbox} files from a mailing list archive. It does this by introducing the \texttt{MailingListFetcher} that provides a common interface for fetching mailing list archives that is designed to be compatible with most online mbox file repositories. It simply defines a single \texttt{download} method that downloads a mailing list (identified by its domain and list name) and saves the mbox files to a given directory. The caller provides a start and end timestamp to limit the download to only those archives pertaining to emails sent within the specified timeframe, and finally a message consumer that can be used for downloader to report messages as it performs the download.
+		
+		\begin{minted}[numbers=none]{java}
+CompletableFuture<Collection<Path>> download(
+	Path dir,
+	String domain,
+	String listName,
+	ZonedDateTime start,
+	ZonedDateTime end,
+	Consumer<String> messageConsumer
+);
+		\end{minted}
+	
+		The download happens asynchronously, and the returned \texttt{CompletableFuture} is completed when the download is complete.
+		
+		Because this research will focus on mailing lists from the Apache Software Foundation, we provide an \texttt{ApacheMailingListFetcher} implementation that implements the above interface. It uses Apache's (undocumented) API endpoint at \href{https://lists.apache.org/api/mbox.lua}{https://lists.apache.org/api/mbox.lua} to download emails via HTTP, using a rate-limited strategy with a delay of 1 second, and a short-circuiting behavior where the fetcher will give up after 10 consecutive months of no emails.
+		
+		For example, we could request the following from the API:
+		
+		\begin{minted}[numbers=none]{bash}
+curl https://lists.apache.org/api/mbox.lua?domain=nemo.apache.org&list=dev&d=2007-12
+		\end{minted}
+		
+		Here, we fetch all emails (in a single mbox file format) from the \textit{dev} list in the Apache Nemo project from the month of December, in 2007. The API will respond with a file download, which our library saves to the system's drive (in the desired directory).
+		
+		\subsubsection{CLI}
+			Besides the programmatic interface that the email downloader provides, it also provides a command-line interface when running the project's JAR file as an executable. The JAR file can be obtained from the project's \href{https://github.com/ArchitecturalKnowledgeAnalysis/EmailDownloader/releases}{releases} page, or built from source using maven:
+			
+			\begin{minted}[numbers=none]{bash}
+mvn clean package assembly:single
+			\end{minted}
+		
+			The CLI provides access to, at the time of writing, just the Apache implementation for the mailing list fetcher, and essentially allows one to invoke the \texttt{download} method from the command-line. Its detailed usage information is provided below.
+			
+			\begin{minted}[numbers=none]{text}
+Usage: EmailDownloader [-hV] -d=<domainName> [--from=<fromDate>] -l=<listName>
+                       [-o=<outputDir>] [--until=<untilDate>]
+  -d=<domainName>            The domain to download from. For example, "hadoop.
+                               apache.org"
+  --from=<fromDate>          Earliest period to download from, inclusive.
+                               Formatted as yyyy-mm.
+  -h, --help                 Show this help message and exit.
+  -l=<listName>              Name of the mailing list to download from.
+  -o, --output=<outputDir>   Directory to place downloaded files in. Will
+                               create it if it doesn't exist.
+  --until=<untilDate>        Latest period to download from, inclusive.
+                               Formatted as yyyy-mm.
+-V, --version                Print version information and exit.
+			\end{minted}
+		
+			This information is also available via the standard \texttt{--help} flag.
+	
+	\subsection{MBox Parser}
+		With the raw mbox files obtained by the email downloader, it's not yet possible to do anything productive until we extract the individual emails and their data. To do this, we introduce the MBox Parser library. This library provides a programmatic method for extracting and pre-processing emails from all mbox files in one or more directories or files.
+		
+		The main interface is the \texttt{MBoxParser} class, from which objects can be instantiated with a provided \texttt{EmailHandler} implementation that executes a callback for each email parsed from the set of mbox files. Specifically, the format for emails obtained by the parser is as follows:
+		
+		\begin{minted}[numbers=none]{java}
+public class Email {
+	public String messageId;
+	public String inReplyTo;
+	public String sentFrom;
+	public String subject;
+	public ZonedDateTime date;
+	public String mimeType;
+	public String charset;
+	public String transferEncoding;
+	public byte[] body;
+}
+		\end{minted}
+	
+		Additionally, a utility method is provided to read the body of the email as a simple string. Internally, the parser makes use of Apache's \href{https://james.apache.org/mime4j/}{Mime4j} library, and a custom email content handler that performs some extra processing on email dates and message ids to improve uniformity:
+		
+		\begin{itemize}
+			\item We expect dates in the RFC-1123 format. For example, \texttt{Sun, 21 Oct 2018 12:16:24 GMT}, and if we get something slightly different, attempts are made to transform it into an acceptable format.
+			\item We strip the angle brackets (\texttt{<} and \texttt{>}) from the email's unique message id. These brackets exist on every email, and do not contribute to the uniqueness of the id. Stripping them makes the message ids more readable as plain text when embedded in HTML or any XML, and makes searching over them easier.
+		\end{itemize}
+
+		The Mbox Parser provides users with the ability to provide their own filter functions to further refine the results, but this will be discussed in more detail when explaining the Email Indexer component.
+	
+	\subsection{Email Indexer}
+	
+	\subsection{Email Dataset Browser}
+		\label{sec:email-dataset-browser}
+	
+	\subsection{Email Dataset Report Generator}
 
 \section{Methodology}
+	\label{sec:methodology}
 	For the purposes of this research, we will focus on analyzing the contents of mailing lists from three major open-source projects from the Apache Software Foundation: \href{https://hadoop.apache.org/}{Hadoop}, \href{https://cassandra.apache.org}{Cassandra}, and \href{https://attic.apache.org/projects/tajo.html}{Tajo}. Mailing list data will be obtained from \href{https://lists.apache.org/}{lists.apache.org}, and this data will be indexed and searched over using \href{https://lucene.apache.org/}{Apache Lucene}. A subset of emails from these mailing lists will be categorized based on the type of architectural design decisions they contain, in order to conjecture about the efficacy of searching.
 	
 	We'll first discuss the process of preparing the datasets, followed by an overview of the methods of categorization and analysis.
@@ -72,9 +233,9 @@
 	\normalsize
 	
 	\subsection{Choosing Sources}
-		While previous work by den Boon chose to analyze data from both issue tracking boards and mailing lists from open-source software projects\autocite{denboon}, this research will limit the scope of sources to just mailing lists, since that is the focus of our research questions. More specifically, a \textit{mailing list} is a "mechanism whereby a message may be distributed to multiple recipients by sending to one address."\autocite{mailinglistrfc} Put more plainly, someone may \textit{subscribe} to a mailing list, and in doing so, they will receive any email which is addressed to that list. Likewise, that person may also send an email to the list's address, and it will be broadcast to all other subscribed recipients. In the context of software development, mailing lists have been used extensively since their inception as a way to collectively discuss and make design decisions regarding large open-source projects. Because of this, we can expect mailing lists for software development to be particularly rich in architectural knowledge, and they make a good candidate for analyzing the effectiveness of various search approaches.
+		While previous work by den Boon chose to analyze data from both issue tracking boards and mailing lists from open-source software projects\cite{denboon}, this research will limit the scope of sources to just mailing lists, since that is the focus of our research questions. More specifically, a \textit{mailing list} is a "mechanism whereby a message may be distributed to multiple recipients by sending to one address."\cite{mailinglistrfc} Put more plainly, someone may \textit{subscribe} to a mailing list, and in doing so, they will receive any email which is addressed to that list. Likewise, that person may also send an email to the list's address, and it will be broadcast to all other subscribed recipients. In the context of software development, mailing lists have been used extensively since their inception as a way to collectively discuss and make design decisions regarding large open-source projects. Because of this, we can expect mailing lists for software development to be particularly rich in architectural knowledge, and they make a good candidate for analyzing the effectiveness of various search approaches.
 		
-		Within the domain of mailing list communications, we can further narrow our search down to software projects which we can reasonably expect to contain a large amount of, and large variety of architectural decisions. These would generally be large projects with many moving parts, which have a broad range of applications and societal uses. The Apache Software Foundation (ASF) is a leader in these sorts of projects, with many open-source systems for managing, processing, and searching through big data, which find their usage in various state-of-the-art enterprises and research endeavors, notably NASA, Facebook, Twitter, Netflix, and so on\autocite{akhtar}. From the ASF, we chose mailing lists from the following three projects for analysis:
+		Within the domain of mailing list communications, we can further narrow our search down to software projects which we can reasonably expect to contain a large amount of, and large variety of architectural decisions. These would generally be large projects with many moving parts, which have a broad range of applications and societal uses. The Apache Software Foundation (ASF) is a leader in these sorts of projects, with many open-source systems for managing, processing, and searching through big data, which find their usage in various state-of-the-art enterprises and research endeavors, notably NASA, Facebook, Twitter, Netflix, and so on\cite{akhtar}. From the ASF, we chose mailing lists from the following three projects for analysis:
 		
 		\begin{enumerate}
 			\item \href{https://cassandra.apache.org}{Cassandra} - An open source NoSQL distributed database trusted by thousands of companies for scalability and high availability without compromising performance.
@@ -159,9 +320,9 @@ public class Email {
 			
 			The schema consists of three entities: \textit{emails}, \textit{tags}, and \textit{mutations} (although mutations are not strictly required).
 			
-			\textbf{Emails} are, as you'd probably expect, the entity that represents a single email message, sent by someone, in a mailing list. While emails \textit{do} have their own unique \texttt{MESSAGE\_ID} attribute\autocite{rfc5322}, they are identified by an 8-byte integer primary key. This reduces the dataset size, improves search performance due to the monotonic nature of incrementing primary keys, and allows for easier referencing of emails by their id, instead of a long, randomly-generated message id.
+			\textbf{Emails} are, as you'd probably expect, the entity that represents a single email message, sent by someone, in a mailing list. While emails \textit{do} have their own unique \texttt{MESSAGE\_ID} attribute\cite{rfc5322}, they are identified by an 8-byte integer primary key. This reduces the dataset size, improves search performance due to the monotonic nature of incrementing primary keys, and allows for easier referencing of emails by their id, instead of a long, randomly-generated message id.
 			
-			Also of note is an email's \texttt{PARENT\_ID}, which is a self-referencing foreign key that references another email entity by its id. This foreign key is the manifestation of the \textit{many-to-one} relationship between an email and its parent, where many "child" emails may refer to one parent email. The parent id is derived, when processing emails, from the email's "In-Reply-To" field. According to RFC 5322, the in-reply-to field, if present, must reference another email's message-id, and this format of replies forms the basis of an email thread's structure\autocite{rfc5322}.
+			Also of note is an email's \texttt{PARENT\_ID}, which is a self-referencing foreign key that references another email entity by its id. This foreign key is the manifestation of the \textit{many-to-one} relationship between an email and its parent, where many "child" emails may refer to one parent email. The parent id is derived, when processing emails, from the email's "In-Reply-To" field. According to RFC 5322, the in-reply-to field, if present, must reference another email's message-id, and this format of replies forms the basis of an email thread's structure\cite{rfc5322}.
 			
 			\textbf{Tags} are entities which can be attached to any number of emails, to offer a method of categorizing emails. Originally in version 1 of the dataset format, tags were not entities but simple texts that were attached to each email, but it was discovered during the development of the tools for this research that there are several benefits to having tags as their own entities: the ability to edit a tag's name, provide a description, and reduce the total dataset size by referencing an 4-byte integer id instead of keeping a copy of a string for each tag applied to an email.
 			
@@ -174,7 +335,7 @@ public class Email {
 		\subsubsection{Indexing with Lucene}
 			Alongside the relational database resides the \texttt{index} directory, as mentioned at the start of this section. This contains the indexes produced by the \href{https://lucene.apache.org/}{Apache Lucene} indexing library when we build an index using the emails in the database. This index is then used for executing query searches over the database by users.
 			
-			For each email in the dataset, we index the following fields as non-stored string-type fields using the \texttt{DOCS\_AND\_FREQS\_AND\_POSITIONS} index options provided by Lucene\autocite{apache-lucene}:
+			For each email in the dataset, we index the following fields as non-stored string-type fields using the \texttt{DOCS\_AND\_FREQS\_AND\_POSITIONS} index options provided by Lucene\cite{apache-lucene}:
 			\begin{itemize}
 				\item The \texttt{SUBJECT} field.
 				\item The \texttt{BODY} field.
@@ -191,7 +352,7 @@ public class Email {
 	
 		Each email can be thought of as a node in the tree, where each reply to that email forms a branch. There is no limit to how wide or deep the tree can become, because there is no universal hard limit on the number of replies to an email, nor on how many replies may be sent in a thread.
 		
-		In previous research by den Boon, this natural tree structure of email threads was artificially flattened into a sequential list, presumably to facilitate more efficient methods of working with the data\autocite{denboon}. However, in this research, the tree structure of the emails is preserved in the dataset, because it more accurately depicts how real users would navigate a set of emails using any number of existing programs, and therefore can provide a better model for determining the effectiveness of searches. This choice does come with some drawbacks, however.
+		In previous research by den Boon, this natural tree structure of email threads was artificially flattened into a sequential list, presumably to facilitate more efficient methods of working with the data\cite{denboon}. However, in this research, the tree structure of the emails is preserved in the dataset, because it more accurately depicts how real users would navigate a set of emails using any number of existing programs, and therefore can provide a better model for determining the effectiveness of searches. This choice does come with some drawbacks, however.
 		
 		\begin{enumerate}
 			\item Because emails form a tree structure, navigating the dataset is more computationally intensive, and more complex for a user, than if one could simply traverse a flat list.
@@ -204,7 +365,7 @@ public class Email {
 	\subsection{Email Dataset Browser}
 		Now that we've prepared methods for fetching mailing lists, storing them, and indexing them for searching, the \href{https://github.com/ArchitecturalKnowledgeAnalysis/EmailDatasetBrowser}{Email Dataset Browser} tool is introduced as a means of first of all (obviously) browsing the set of all emails, searching over the emails using Lucene search queries, and categorizing emails using user-defined tags. This tool forms the basis for generating useful datasets with which we can perform analysis on the types of architectural knowledge that's found and annotated within the dataset.
 		
-		While this research builds off of the work of den Boon\autocite{denboon}, it was determined to be infeasible to use the \textit{ArchDetector} tool developed for categorization.
+		While this research builds off of the work of den Boon\cite{denboon}, it was determined to be infeasible to use the \textit{ArchDetector} tool developed for categorization.
 		
 		\begin{itemize}
 			\item The Apache software foundation had updated their infrastructure for mailing list management, which broke compatibility with the tool.
@@ -231,53 +392,7 @@ public class Email {
 	
 		For more information on the implementation details of the EDB, please consult the \href{https://github.com/ArchitecturalKnowledgeAnalysis/EmailDatasetBrowser}{GitHub repository}.
 	
-	\subsection{Defining Types of Design Decisions}
-		\label{sec:design-decisions}
-		Before we can begin searching for architectural knowledge in earnest, we must first exhaustively define the types of distinct architectural design decisions that will be categorized.
-		
-		We start by evaluating Kruchten's original set of design decisions in section 2.1 of "Building Up and Reasoning About Architectural Knowledge"\autocite{kruchten}, which lists four main kinds of decisions: \textbf{existence}, \textbf{ban}, \textbf{property}, and \textbf{executive}.
 	
-		These decisions were conceived in a domain that must consider architectural knowledge from a large variety of sources, and so we also consult den Boon\autocite{denboon} and Faroghi\autocite{faroghi} for more information that's specific to open-source issue/ticket boards and mailing lists. From their more specific lists, as well as some cursory categorization attempts, the following architectural design decisions were adopted.
-		
-		\subsubsection{\textbf{Existence}}
-			Existence decisions are those that are concerned with the creation of new elements of a system's conceptual or implementation architecture, or the creation of behavioral connections between existing components. Generally, existence decisions manifest themselves in discussions about whether to add a new component to a system, or to link components together.
-			
-			\textit{Structural} decisions are a subset of existence decisions that focus solely on the creation or modification of components of an architecture; most often the addition of new components to a system.
-			
-			On the other hand, \textit{behavioral} existence decisions are concerned with, well, the behavior of the components of a system, namely how multiple components in a system interact with each other.
-			
-			For example,
-			\begin{itemize}
-				\item The system shall incorporate an additional process manager to orchestrate other high-level tasks.
-				\item The system shall send periodic "heartbeat" packets to connected subsystems.
-			\end{itemize}
-			
-		\subsubsection{\textbf{Property}}
-			This category of design decision is taken almost verbatim from Kruchten's originally proposed list of architectural design decisions\autocite{kruchten}, and is defined as one which states an enduring, overarching trait or quality of the system. This is not so much related to any particular element or behavior because they often necessarily affect many components with cross-cutting concerns.
-			
-			For example,
-			\begin{itemize}
-				\item The system shall be able to process at least 10,000 incoming connections concurrently.
-				\item The system shall allow for flexible third-party plugin integration.
-			\end{itemize}
-		
-		\subsubsection{\textbf{Process}}
-			Again, this design decision is taken without much need for revision, from previous papers on the subject. A process decision is concerned less with the architecture itself, and more the internal development process. This includes things like software quality and testing strategies, code review procedures, and enhancement proposal protocols.
-			
-			For example,
-			\begin{itemize}
-				\item We as developers should define a strict suite of tests that must pass in order for any new release to be made available to the public.
-				\item We should create a formal procedure for submitting patch requests.
-			\end{itemize}
-		
-		\subsubsection{\textbf{Technology}}
-			These decisions are made regarding the comparison, evaluation, and choice of third-party technologies for use in or with an architecture. This could be as simple as discussing a choice of programming language, to choosing a set of supported Open-ID Connect API providers for a user authentication micro-service. Generally, an email shall be considered to contain a technology design "decision", even if no discrete decision is made in that email. This is because a large part of technology discussions focuses on evaluating the properties of various alternative solutions, and such discussions have been found in practice to end with a rather simple, abrupt choice based on a vote.
-			
-			For example,
-			\begin{itemize}
-				\item We would like to use the \textit{D} programming language to write startup scripts for the system, because of its flexible syntax and high performance\autocite{bright}.
-				\item Our development team should make a choice between using Jira or GitHub Issues for our ticket board. Here are their pros and cons: ...
-			\end{itemize}
 	
 	\subsection{Categorization Process}
 		This study categorized the architectural knowledge contained in 1919 individual emails, spread across 188 different email threads from Hadoop, Cassandra, and Tajo developer mailing lists. This section provides an overview of how this was achieved.
@@ -346,7 +461,7 @@ public class Email {
 			This metric tells what ratio of results returned by a query contain some architectural knowledge, so it can be of use to describe how effective a search is at returning \textit{anything} of value, but does not account for the rank of elements in the search, nor the true relevance of email threads. This equation works for analyzing searches over individual emails, and searches over threads by obtaining $ rel_i $ using either \eqref{eqn:relemail} or \eqref{eqn:relthread}, respectively.
 			
 		\subsubsection{Normalized Discounted Cumulative Gain}
-			A better metric that accounts for a result's \textit{rank} in addition to its relevance is the \href{}{Discounted Cumulative Gain}, and this helps us to model real-world user persistence in examining large result sets\autocite{jarvelin}.
+			A better metric that accounts for a result's \textit{rank} in addition to its relevance is the \href{}{Discounted Cumulative Gain}, and this helps us to model real-world user persistence in examining large result sets\cite{jarvelin}.
 
 			\begin{equation}
 				\tag{DCG}
@@ -354,7 +469,7 @@ public class Email {
 				\label{eqn:dcg}
 			\end{equation}
 			
-			However, this metric may be wildly different depending on the query that's used. To compensate for this, we \textit{normalize} the cumulative gain by comparing the DCG to the best possible result that could be obtained, also known as the \textit{ideal} DCG\autocite{stanfordslides}. Let $ REL_n $ be the list of the $ n $ most relevant documents in the dataset, ordered in descending order. Then we can compute the ideal DCG as follows:
+			However, this metric may be wildly different depending on the query that's used. To compensate for this, we \textit{normalize} the cumulative gain by comparing the DCG to the best possible result that could be obtained, also known as the \textit{ideal} DCG\cite{stanfordslides}. Let $ REL_n $ be the list of the $ n $ most relevant documents in the dataset, ordered in descending order. Then we can compute the ideal DCG as follows:
 			
 			\begin{equation}
 				\tag{IDCG}
@@ -370,10 +485,10 @@ public class Email {
 				\label{eqn:ndcg}
 			\end{equation}
 		
-			In the end, we can use NDCG as a general metric to evaluate the effectiveness of a search query to produce \textit{highly relevant} results, with the \textit{most relevant results first}. In theory, we would like a perfect query for which the NDCG is computed as 1 for all $ n $\autocite{denboon}.
+			In the end, we can use NDCG as a general metric to evaluate the effectiveness of a search query to produce \textit{highly relevant} results, with the \textit{most relevant results first}. In theory, we would like a perfect query for which the NDCG is computed as 1 for all $ n $\cite{denboon}.
 			
 		\subsubsection{N-Gram Patterns}
-			Besides evaluating the effectiveness of the various query searches, we'd also like to answer questions about the content of architectural knowledge, and identifying patterns in how such knowledge appears can be key to understanding this. To that end, inspiration was taken from the \href{https://en.wikipedia.org/wiki/N-gram}{N-Gram} method for analyzing natural language. N-gram models have been used successfully in machine translation, speech recognition, entity detection, and information extraction\autocite{google-ngram}. The n-gram approach can be applied to an email thread to find the most common ordered $ n $ length sequences of tags that appear in the dataset. Furthermore, Guthrie et al. demonstrated that \textit{skip-grams} (a technique where unmarked elements can be skipped) are effective at finding meaningful value from datasets without needing to increase the size of the dataset\autocite{guthrie}.
+			Besides evaluating the effectiveness of the various query searches, we'd also like to answer questions about the content of architectural knowledge, and identifying patterns in how such knowledge appears can be key to understanding this. To that end, inspiration was taken from the \href{https://en.wikipedia.org/wiki/N-gram}{N-Gram} method for analyzing natural language. N-gram models have been used successfully in machine translation, speech recognition, entity detection, and information extraction\cite{google-ngram}. The n-gram approach can be applied to an email thread to find the most common ordered $ n $ length sequences of tags that appear in the dataset. Furthermore, Guthrie et al. demonstrated that \textit{skip-grams} (a technique where unmarked elements can be skipped) are effective at finding meaningful value from datasets without needing to increase the size of the dataset\cite{guthrie}.
 			
 			Therefore, we present a \hyperref[sec:pattern-algorithm]{recursive algorithm} for finding a list of all known sequences of email ids in a thread that correspond to one of many possible tag patterns, which can optionally be configured to skip non-architectural emails (generating a skip-gram model).
 			
@@ -492,7 +607,7 @@ public class Email {
 			\end{tabular}
 		\end{table}
 	
-		Already with just the 2-gram model, it is clear that there is a sort of bidirectional relationship between property and existence decisions, and between existence and technology decisions. Furthermore, the model indicates that there is not a strong directionality in the patterns, since most pairs have a similar frequency with both orientations. The skip-gram technique does lead to more abundant results, but there may be a slightly reduced accuracy\autocite{guthrie}, in that an arbitrary number of intermediate emails have been skipped, thus the application of a skip-gram model may not be as reliable as the non-skip, but seems to perform better without needing a larger dataset.
+		Already with just the 2-gram model, it is clear that there is a sort of bidirectional relationship between property and existence decisions, and between existence and technology decisions. Furthermore, the model indicates that there is not a strong directionality in the patterns, since most pairs have a similar frequency with both orientations. The skip-gram technique does lead to more abundant results, but there may be a slightly reduced accuracy\cite{guthrie}, in that an arbitrary number of intermediate emails have been skipped, thus the application of a skip-gram model may not be as reliable as the non-skip, but seems to perform better without needing a larger dataset.
 	
 		\begin{table}[H]
 			\centering
@@ -600,7 +715,7 @@ public class Email {
 \section{Conclusion}
 	In this study, we prepared tools to fetch and process mailing lists, and prepared a categorized dataset containing 1919 emails in 188 unique email threads, to determine what types of architectural knowledge exists in open-source software development mailing lists. The results of a varied set of analyses over this dataset tell us first and foremost that \textit{most} emails in such mailing lists do not contain useful architectural design decisions, but that a large proportion of email threads \textit{do} contain architectural design decisions. There exists a strong relationship between existence decisions and both technology and property decisions, as a natural consequence of the flow of a conversation from proposal to an evaluation of alternative solutions, to choosing an accepted solution.
 	
-	From applying Apache Lucene search queries to the dataset, the precision and NDCG metrics for both thread-based and individual email results indicate that the current search implementation is not effective for finding a sufficient amount of architectural knowledge, when compared to similar metrics performed by den Boon\autocite{denboon} where queries achieved NDCG measures of greater than $ 0.9 $ over 100 results.
+	From applying Apache Lucene search queries to the dataset, the precision and NDCG metrics for both thread-based and individual email results indicate that the current search implementation is not effective for finding a sufficient amount of architectural knowledge, when compared to similar metrics performed by den Boon\cite{denboon} where queries achieved NDCG measures of greater than $ 0.9 $ over 100 results.
 	
 	Open-source software development mailing lists, as shown by this research, present ample opportunity for extracting architectural knowledge, and we have shown that contextual patterns in the types of design decisions can be used to further aid in searching. However, the search methods used in this study, or the metrics used to grade them, were insufficient to conclude that keyword-based Lucene queries are an effective tool for extracting that knowledge. More work is needed to improve how the queries operate over email threads, how to compute a more accurate relevance measure, and improved metrics are needed to be able to better differentiate the performance of different queries.
 	
@@ -614,7 +729,7 @@ public class Email {
 	\subsection{Future Work}
 		This study provides a solid basis for identifying the types and amount of architectural knowledge that can be found in open-source software development mailing lists, but is far from an exhaustive resource on the matter. Additional research is needed to further expand on the data with additional mailing lists from other open-source communities that focus on different types of software. While we explored the patterns in how architectural design decisions are made, our research was limited to exclusively the content of the emails themselves, and there are many examples where the discussion in an email is migrated to a Jira or GitHub issue tracker, and the reasons for these "jumps" between media has not yet been explored, nor the patterns which might exist between discussions on either end.
 		
-		While more work can be done to improve the indexing and searching implementation, and the queries used by it, research by Bhat et al.\autocite{bhat} shows that there is promise in designing machine learning models to automatically extract architectural knowledge. The data in this study can be incorporated into training data for such models.
+		While more work can be done to improve the indexing and searching implementation, and the queries used by it, research by Bhat et al.\cite{bhat} shows that there is promise in designing machine learning models to automatically extract architectural knowledge. The data in this study can be incorporated into training data for such models.
 		
 		The tools developed for this study are rudimentary in nature, but have been developed to the best of the researcher's abilities to be future-proof and open to expansion and re-use, and we encourage others to build on their capabilities. Currently, the \href{https://github.com/ArchitecturalKnowledgeAnalysis/EmailDownloader}{EmailDownloader} utility supports only Apache Software Foundation mailing lists, but could be expanded easily to support others as well. The \href{https://github.com/ArchitecturalKnowledgeAnalysis/EmailIndexer}{EmailIndexer} utility currently only supports the H2 database implementation, which offers limited concurrency when operating in embedded mode, and this can be improved to allow for multi-user systems where many people can contribute to a single dataset's information at once. And finally, the \href{https://github.com/ArchitecturalKnowledgeAnalysis/EmailDatasetBrowser}{EmailDatasetBrowser} application could be expanded to include real-time analytics and improved search interfaces.
 
@@ -690,7 +805,6 @@ CREATE TABLE EMAIL_TAG (
 	PRIMARY KEY (EMAIL_ID, TAG_ID)
 );
 
-/* Utility tables to record all changes made to the dataset. Each mutation should affect one or more emails. */
 CREATE TABLE MUTATION (
 	ID BIGINT PRIMARY KEY AUTO_INCREMENT,
 	DESCRIPTION LONGTEXT NOT NULL,

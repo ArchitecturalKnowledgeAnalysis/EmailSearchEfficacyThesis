@@ -130,6 +130,19 @@
 			\item Analysis is performed on the data and visualizations are generated.
 		\end{enumerate}
 	
+	\subsection{Architecture}
+		\begin{figure}
+			
+			\includegraphics[width=\textwidth]{img/architecture.png}
+			\caption{System architecture for the various tools developed for this research.}
+			\label{fig:architecture-diagram}
+		\end{figure}
+	
+		As shown in figure \ref{fig:architecture-diagram}, the user mainly interacts with the \textit{Email Dataset Browser} and the \textit{Report Generator} for a typical workflow, and the user may also manually use the \textit{Email Downloader} via a command-line interface if they so choose. As discussed in the \hyperref[sec:email-dataset-browser]{browser's overview}, the browser provides a graphical user interface for downloading emails from Apache's mailing list API, generating a dataset from those downloaded emails, and interacting with that dataset. The browser internally uses the \textit{Email Indexer} for the majority of its work, and the \textit{Email Downloader} to provide its download capabilities. Furthermore, the Email Indexer uses the \textit{MBox Parser} internally for its dataset generation algorithm.
+		
+		Once a dataset is generated, it is available to be read by the \textit{Report Generator}, which simply examines all the information in the dataset to produce some aggregate data and visualizations.
+		
+		Generally, users only need to concern themselves with the Browser and Report Generator; all other components are simply dependencies. A user's workflow should generally remain entirely within the scope of the browser's functionality, and occasionally invoking the report generator on datasets when desired.
 	\newpage
 	\subsection{Email Downloader}
 		\label{sec:email-downloader}
@@ -150,13 +163,11 @@ CompletableFuture<Collection<Path>> download(
 		
 		Because this research will focus on mailing lists from the Apache Software Foundation, we provide an \texttt{ApacheMailingListFetcher} implementation that implements the above interface. It uses Apache's (undocumented) API endpoint at \href{https://lists.apache.org/api/mbox.lua}{https://lists.apache.org/api/mbox.lua} to download emails via HTTP, using a rate-limited strategy with a delay of 1 second, and a short-circuiting behavior where the fetcher will give up after 10 consecutive months of no emails.
 		
-		For example, we could request the following from the API:
+		For example, we could request an MBox file from the API containing all emails sent in March of 2022 in the \textit{common-dev} mailing list in Hadoop.
 		
 		\begin{minted}[numbers=none]{bash}
-curl https://lists.apache.org/api/mbox.lua?domain=nemo.apache.org&list=dev&d=2007-12
+https://lists.apache.org/api/mbox.lua?domain=hadoop.apache.org&list=common-dev&d=2022-03
 		\end{minted}
-		
-		Here, we fetch all emails (in a single mbox file format) from the \textit{dev} list in the Apache Nemo project from the month of December, in 2007. The API will respond with a file download, which our library saves to the system's drive (in the desired directory).
 		
 		\subsubsection{CLI}
 			Besides the programmatic interface that the email downloader provides, it also provides a command-line interface when running the project's JAR file as an executable. The JAR file can be obtained from the project's \href{https://github.com/ArchitecturalKnowledgeAnalysis/EmailDownloader/releases}{releases} page, or built from source using maven:
@@ -168,22 +179,46 @@ mvn clean package assembly:single
 			The CLI provides access to, at the time of writing, just the Apache implementation for the mailing list fetcher, and essentially allows one to invoke the \texttt{download} method from the command-line. Its detailed usage information is provided below.
 			
 			\begin{minted}[numbers=none]{text}
-Usage: EmailDownloader [-hV] -d=<domainName> [--from=<fromDate>] -l=<listName>
-                       [-o=<outputDir>] [--until=<untilDate>]
-  -d=<domainName>            The domain to download from. For example, "hadoop.
-                               apache.org"
-  --from=<fromDate>          Earliest period to download from, inclusive.
-                               Formatted as yyyy-mm.
-  -h, --help                 Show this help message and exit.
-  -l=<listName>              Name of the mailing list to download from.
-  -o, --output=<outputDir>   Directory to place downloaded files in. Will
-                               create it if it doesn't exist.
-  --until=<untilDate>        Latest period to download from, inclusive.
-                               Formatted as yyyy-mm.
--V, --version                Print version information and exit.
+Usage: EmailDownloader [-hV] [--apache-api-url=<apacheApiUrl>] [--apache-max-failures=<apacheMaxConsecutiveFailures>]
+[--apache-request-interval=<apacheRequestInterval>]
+-d=<domainName> [--from=<fromDate>] -l=<listName>
+[-o=<outputDir>] [--until=<untilDate>]
+--apache-api-url=<apacheApiUrl>
+			The URL to Apache's MBox API.
+--apache-max-failures=<apacheMaxConsecutiveFailures>
+			The maximum number of consecutive failures in
+			email fetching to tolerate before quitting the
+			download early.
+--apache-request-interval=<apacheRequestInterval>
+			The number of milliseconds to wait between each
+			API request, to avoid rate-limiting
+			repercussions.
+-d, --list-domain=<domainName>
+			The domain to download from. For example, "hadoop.
+			apache.org"
+--from=<fromDate>
+			Earliest period to download from, inclusive.
+			Formatted as yyyy-mm. Defaults to ten years
+			before today.
+-h, --help                 Show this help message and exit.
+-l, --list-name=<listName> Name of the mailing list to download from.
+-o, --output=<outputDir>
+			Directory to place downloaded files in. Will
+			create it if it doesn't exist. Defaults to ./emails/
+--until=<untilDate>
+			Latest period to download from, inclusive.
+			Formatted as yyyy-mm. Defaults to the current
+			year and month.
+-V, --version              Print version information and exit.
 			\end{minted}
 		
 			This information is also available via the standard \texttt{--help} flag.
+			
+			For example, if we want to download MBox files containing all emails sent in the \textit{common-dev} mailing list under Hadoop from January 2020 until the present day, we would execute the following command:
+			
+			\begin{minted}[numbers=none]{bash}
+java -jar emaildownloader-1.2.0.jar -l common-dev -d hadoop.apache.org --from 2020-01 -o emails
+			\end{minted}
 	
 	\newpage
 	\subsection{MBox Parser}
@@ -607,6 +642,62 @@ public interface ChartRenderer {
 			\end{minted}
 		
 			This way, the rendering operations can be parallelized. The speedup from this is minimal, but should provide clear benefits with larger datasets (of more than 5,000 tagged emails). The resultant images are placed in the working directory of the program. This is managed by the pipeline runner that correctly adapts its working directory to place the visualizations into a \texttt{visual} directory alongside the other JSON files.
+			
+	\newpage
+	\subsection{A Minimal Workflow Example}
+		To help illustrate how exactly everything fits together, this section will lay out a step-by-step guide that takes the user through generating a dataset, working with it, and finally using the report generator to produce visualizations and analyses.
+		
+		\footnotesize
+		Note: You will need to have Java 17 or higher installed on your system. You can download it \href{https://adoptium.net/temurin/releases}{here}. You will also need a recent D compiler toolchain, which you can download \href{https://dlang.org/download.html}{here}.
+		\normalsize
+		
+		\begin{enumerate}
+			\item Download the latest version of the Email Dataset Browser \href{https://github.com/ArchitecturalKnowledgeAnalysis/EmailDatasetBrowser/releases/latest}{here}. It is an executable JAR file, so Linux users may need to mark the file as executable, either through their file explorer, or with the following command (replace \texttt{<version>} with the version you downloaded):
+				\begin{minted}[numbers=none]{bash}
+	chmod +x emaildatasetbrowser-<version>.jar
+				\end{minted}
+			
+			\item Open the Browser application. It should open to a blank view, with the various search panels on the left. Go to the application's menu, and Click on \textbf{File} > \textbf{Generate Dataset}.
+			
+			\item For this example, we'll download some emails from Hadoop's \textit{common-dev} mailing list, but you could also use the MBox files from the \href{https://github.com/ArchitecturalKnowledgeAnalysis/Datasets}{Datasets} repository that has been provided. In the \textit{Generate Dataset} dialog, click on the \textbf{Download Emails} button. This will open another \textit{Download} dialog.
+			
+				Enter \texttt{hadoop.apache.org} for the \textbf{Domain}, and \texttt{common-dev} for the \textbf{List}. Select January 1st, 2022, as the \textbf{Start} date (time doesn't matter), and leave the \textbf{End} date at its default value.
+				
+				Click on \textbf{Select directory...} to select the directory that the MBox files will be downloaded to. This can be any location, but it's recommended to create a new directory since quite a few files might be downloaded, and it'll otherwise add a lot of clutter.
+				
+				Finally, click \textbf{Download} to begin the process of downloading the MBox files. A progress dialog will appear, which shows a log of each individual file download's status. You'll be notified when the download is finished, and at this point, you can safely click \textbf{Done} to close the progress dialog.
+			
+			\item Now that we have a set of MBox files on our system, we can click the \textbf{Add Mbox Directory} button to select the directory containing those MBox files. The directory should appear in the \textit{Generate Dataset} dialog's list. For this example, we'll just be using one directory, but you can add more if you want.
+			
+			\item Click on \textbf{Select directory...} to choose the directory to generate your dataset in. This should preferably be an empty directory.
+			
+			\item Click \textbf{Generate} to start the process of generating the dataset. This will open a progress dialog with some detailed information about what's currently happening in the generation process. Once the generation is complete, you can safely click the \textbf{Done} button to close it.
+			
+			\item Click on \textbf{File} > \textbf{Open Dataset}, and in the dialog, select the directory containing the dataset we just generated, and click \textbf{Open}. The browser's search panel on the left should populate with some emails, and the main email view should contain information about the first email.
+			
+			\item Click on \textbf{Tag} > \textbf{Tag Manager} in the application menu to open the tag manager dialog. In order to use the report generator and its visualization, we must add the following tags: "existence", "property", "process", "technology", and "not-ak".
+			
+			\item You can go ahead and browse the dataset and apply tags to emails as you see fit. For the remainder of this guide, we'll be using a pre-populated dataset which you can download \href{https://github.com/ArchitecturalKnowledgeAnalysis/Datasets/raw/main/datasets/iteration-9.zip}{here}, since it has a large volume of tagged emails and thus can produce some decent visualizations. If you download it, unzip it to a directory.
+			
+			\item Now that we have a dataset with some annotated emails, we'll demonstrate running the report generator on it. Note that the report generator is only tested on Linux systems; use Windows and MacOS at your own risk. All further instructions include bash-specific commands.
+			
+				Clone the repository to your PC, and then call the \texttt{run\_pipeline.d} script to run the pipeline on your dataset.
+				\begin{minted}[numbers=none]{bash}
+git clone https://github.com/ArchitecturalKnowledgeAnalysis/EmailDatasetReportGen.git
+cd EmailDatasetReportGen/
+./run_pipeline.d /path/to/my/dataset
+				\end{minted}
+				The analysis may take a while, since it includes a very intensive natural-language-processing step. Once it's done, you should see a new directory whose name is formatted like \texttt{report\_DATE\_TIME}.
+				
+				Inside the report directory, you'll find the following:
+				\begin{itemize}
+					\item \texttt{emails.json}, \texttt{searches.json}, and \texttt{mutations.json} contain the raw export data from the dataset.
+					\item \texttt{analysis\_results.json} contains the raw data produced by the analysis step.
+					\item \texttt{lemmas.json} contains NPL lemma data.
+					\item The \texttt{visual/} directory contains all visualizations.
+				\end{itemize}
+				
+		\end{enumerate}
 
 \section{Methodology}
 	\label{sec:methodology}
@@ -1209,10 +1300,15 @@ the beginning says, compression is not a goal.
 		
 		Regarding the existence $ \leftrightarrow $ property relationship, several cases indicate that this happens when a participant begins a high-level proposal or discussion on adding a new component, or integrating a subsystem into the main architecture. This tends to initiate a conversation with one or more property decisions, as users and developers debate on the existing and new properties of the system, and once this is resolved, concrete components or connections between components are proposed.
 		
-		\subsubsection{Example A}
+		\subsubsection{Example: Existence and Property}
+			\footnotesize
+				Thread: [DISCUSS] CEP-19: Trie memtable implementation
+			\normalsize
+			
 			An initial email proposes a new implementation of a memtable for the Cassandra project.
 			
 			\begin{minted}[numbers=none]{text}
+#ID 43605
 We would like to contribute our TrieMemtable to Cassandra.
 
 This is a new memtable solution aimed to replace the legacy implementation, developed with the following objectives:
@@ -1225,6 +1321,7 @@ The new memtable relies on CASSANDRA-6936 to translate to and from byte-ordered 
 			This first email is an example of one where existence and property decisions happen together: in this case, the new memtable implementation is a structural change to the architecture, and provides several features that allow better qualitative properties of Cassandra. In a response, we see more existence decisions as the details of the proposed implementation are explained (as these details often imply structural changes to the architecture).
 			
 			\begin{minted}[numbers=none]{text}
+#ID 43130
 The memtable pluggability API (CEP-11) is per-table to enable memtable selection that suits specific workflows. It also makes full sense to permit per-node configuration, both to be able to modify the configuration to suit heterogeneous deployments better, as well as to test changes for improvements such as this one. 
 Recognizing this, the patch comes with a modification to the API that defines memtable templates in cassandra.yaml (i.e. per node) and allows the schema to select a template (in addition to being able to specify the full memtable configuration). One could use this e.g. by adding:
 memtable_templates:
@@ -1238,10 +1335,15 @@ memtable:
 (which defines two templates and specifies the default memtable implementation to use) to cassandra.yaml and specifying  WITH memtable = {'template' : 'trie'} in the table schema.
 			\end{minted}
 		
-		\subsubsection{Example B}
-			In a thread titled \textit{Hadoop Summit: Security Design Lounge Session}, the first email begins by summarizing the attendance and main takeaways from a recent Hadoop Summit meetup, and intends to continue discussion about Hadoop's security in the thread. The author guided the discussion primarily to how to improve Hadoop's security. Already, this identification of points of improvement for the system and preliminary discussion includes property and existence decisions.
+		\subsubsection{Example: Existence and Technology}
+			\footnotesize
+				Thread: Hadoop Summit: Security Design Lounge Session
+			\normalsize
+			
+			In this thread, the first email begins by summarizing the attendance and main takeaways from a recent Hadoop Summit meetup, and intends to continue discussion about Hadoop's security in the thread. The author guided the discussion primarily to how to improve Hadoop's security. Already, this identification of points of improvement for the system and preliminary discussion includes property and existence decisions.
 			
 			\begin{minted}[numbers=none]{text}
+#ID 17569
 ...
 In order to keep the scope of conversations manageable we tried to keep focused on authentication and the ideas around SSO and tokens.
 
@@ -1262,6 +1364,7 @@ It seemed to be consensus that:
 			One response to this email provided more support for modifying Hadoop's authentication mechanisms to support pluggable authentication providers, and mentions a third-party authentication provider (ApacheDS) as one example of how it could work.
 			
 			\begin{minted}[numbers=none]{text}
+#ID 17690
 There was certainly discussions around the emerging work from Daryn related to pluggable authentication mechanisms within that layer and we will immediately have the options of kerberos, simple and plain. There was also talk of how this can be leveraged to introduce a Hadoop token mechanism as well. 
 
 At the same time, there was talk of the possibility of simply making kerberos easy and a non-issue for intra-cluster use. Certainly we need both of these approaches.
@@ -1271,10 +1374,15 @@ I believe someone used ApacheDS' KDC support as an example - if we could standup
 	
 		In the other common bidirectional case with existence $ \leftrightarrow $ technology, we see a similar pattern of a proposal followed by a rich discussion. For this relationship, however, proposals often directly or indirectly mention third-party technologies, and ensuing conversation includes a series of emails that evaluate the value of integrating such technologies into the architecture.
 		
-		\subsubsection{Example C}
+		\subsubsection{Example: Technology and Property}
+			\footnotesize
+				Thread: [Discuss] replacement of airlift/airline framework in CLI tools
+			\normalsize
+			
 			In this example, we look at a discussion surrounding the replacement of some old CLI framework used by various Cassandra tools. The current framework (airlift/airline) is deprecated and this email thread is continuing a conversation started in a Slack (instant messaging service) channel.
 			
 			\begin{minted}[numbers=none]{text}
+#ID 43623
 In CASSANDRA-17445 we’ve started discussing the options of replacing the deprecated airlift/airline framework used in CLI tools.
 
 Considering the amount of commands this framework is used in, the impact this might cause and the future possibilities the operational aspects of Cassandra could leverage, first comments at slack revealed an in-depth discussion would be desirable.
@@ -1285,6 +1393,7 @@ Kind request for comments.
 			The initial message simply expresses a desire to replace the CLI framework, but doesn't provide any specific solutions. This intention to refactor/replace the CLI framework is already an existence decision, as it will generally mean adding and removing some structural components to facilitate a new CLI dependency. Replies go into more detail about actual technologies that can be used to replace the airlift/airline framework.
 		
 			\begin{minted}[numbers=none]{text}
+#ID 43650
 Maintaining some other tools, originally inspired by nodetool, I started evaluating alternatives. Started with airline2 and picocli, my preliminary findings are
 
 airline2:
@@ -1311,6 +1420,7 @@ In my opinion, there is room for improvement, especially on documentation and th
 			The above reply provides one of the most typical examples of an excellent comparison of technologies, in this case CLI frameworks to use for Cassandra's tools. It also contains a slight property decision, by advocating for the improvement of the tools' usability.
 		
 			\begin{minted}[numbers=none]{text}
+#ID 43648
 airline/airlift is deprecated. I suspect if there were any security issues they would not be fixed. Their project recommends moving to Airline 2 or picocli.
 
 I share Stefan's concern about the stability of the CLI and output formatting. We should avoid any breakages resulting from this migration. Lots of automation depends on this "interface" being stable.
@@ -1318,10 +1428,15 @@ I share Stefan's concern about the stability of the CLI and output formatting. W
 		
 			And finally, this reply simply provides a little bit more detail into the motivation behind the desired change.
 			
-		\subsubsection{Example D}
-			In another example, we look at a proposal by a developer for opening Hadoop up to alternative authentication methods beyond just Kerberos (this relates to example B). The initial email provides a list of motivations for why developers should want to do this, and proceeds to ask for community feedback and ideas.
+		\subsubsection{Example: Technology, Evaluating Alternatives}
+			\footnotesize
+				Thread: [DISCUSS] Secure Hadoop without Kerberos
+			\normalsize
+			
+			In another example, we look at a proposal by a developer for opening Hadoop up to alternative authentication methods beyond just Kerberos (this relates to the second example on existence and technology). The initial email provides a list of motivations for why developers should want to do this, and proceeds to ask for community feedback and ideas.
 			
 			\begin{minted}[numbers=none]{text}
+#ID 38943
 Kerberos was developed decade before web development becomes popular.
 There are some Kerberos limitations which does not work well in Hadoop.  A
 few examples of corner cases:
@@ -1352,6 +1467,7 @@ Hadoop OpenID Connect integration work?
 			Another developer responds with more specific information about how they have experience with OpenID Connect (OIDC) authentication.
 			
 			\begin{minted}[numbers=none]{text}
+#ID 39025
 I'm interested in OpenID Connect (OIDC) integration.
 
 In addition to the benefits (security, cloud native), operating costs may
@@ -1367,6 +1483,7 @@ and that way operating costs will be reduced.
 			This reply provides another motivation for adding support for alternative authentication mechanisms, but mostly motivated by cost optimization rather than just intrinsic benefit of the architecture. This is a common occurrence in technology emails, where respondents qualify their opinions based on the costs of different choices on their industry.
 			
 			\begin{minted}[numbers=none]{text}
+#ID 39045
 We aren’t very far from having OIDC support.  The pre-requisite RPC/TLS &
 RPC/mTLS recently completed rollout to our entire production grid.
 Majority of the past year was spent shaking out bugs and ensuring 100%
@@ -1384,7 +1501,46 @@ still acquired by jobs to avoid short-lived identity credential expiration.
 			\end{minted}
 			
 			And generally, we see multiple emails of a similar nature in technology discussions, where respondents provide their perspective on how they use a technology in their organization, and in the above case, some details about the implementation or how it can be used.
+			
+			Further in the discussion, a reply to Email \#ID 39025 provides more information about solutions for reverse proxy setups, especially promoting the use of Nginx as one such implementation. In the second part, it goes into detail about the requirements of a Hadoop single-sign-on integration, and this list of requirements is an example of an existence decision, with both structural and behavioral elements.
+			
+			\begin{minted}[numbers=none]{text}
+#ID 39027
+Thank you for the information.  Knox plays a main role in reverse proxy for
+Hadoop cluster.  I understand the importance to keep Knox running to
+centralize audit log for ingress into the cluster.  Other reverse proxy
+solution like Nginx are more feature rich for caching static contents and
+load balancer.  It would be great to have ability to use either Knox or
+Nginx as reverse proxy solution.  Company wide OIDC is likely to run
+independently from Hadoop cluster, but also possible to run in a Hadoop
+cluster.  Reverse proxy must have ability to redirects to OIDC where
+exposed endpoint is appropriate.
+
+HADOOP-11717 was a good effort to enable SSO integration except it is
+written to extend on Kerberos authentication, which prevents decoupling
+from Kerberos a reality.  I gathered a few design requirements this
+morning, and welcome to contribute:
+
+1.  Encryption is mandatory.  Server certificate validation is required.
+2.  Existing token infrastructure for block access token remains the same.
+3.  Replace delegation token transport with OIDC JWT token.
+4.  Patch token renewer logic to support renew token with OIDC endpoint
+before token expires.
+5.  Impersonation logic uses service user credentials.  New way to renew
+service user credentials securely.
+6.  Replace Hadoop RPC SASL transport with TLS because OIDC works with TLS
+natively.
+7.  Command CLI improvements to use environment variables or files for
+accessing client credentials
+
+Downgrade the use of UGI.doAs() to private of Hadoop.  Service should not
+run with elevated privileges unless there is a good reason for it (i.e.
+loading hive external tables).
+I think this is good starting point, and feedback can help to turn these
+requirements into tasks.
+			\end{minted}
 	
+	\newpage
 	\subsection{Search Effectiveness}
 		To determine the effectiveness of our four \hyperref[sec:queries]{queries} at finding relevant emails and threads rich in architectural design decisions, we will use both the \hyperref[eqn:precision]{precision} and \hyperref[eqn:ndcg]{NDCG} as metrics to evaluate over each query.
 		
@@ -1392,7 +1548,7 @@ still acquired by jobs to avoid short-lived identity credential expiration.
 		
 		In figure \ref{fig:ndcgall}, the NDCG metric is visualized for the four queries. The graph is less chaotic than the precision graph, and we can see a more organized trend line for three of queries, while the \textit{reusable solutions} performs consistently at the lowest level. Again, \textit{decision factors} and \textit{rationale} perform well initially, and in this metric, they continue to provide the best performance, albeit by a tiny margin. Despite the fact that the NDCG metric "discounts" results at lower ranks in the result, the queries appear to improve in performance slightly as the result set grows larger. This could indicate that the factor by which we discount lower-ranked results is too weak, or that the queries are simply not effective at ranking highly-relevant results appropriately.
 		
-		\begin{figure}
+		\begin{figure}[H]
 			\centering
 			\includegraphics[width=\textwidth]{report/all_tags_thread_precision.png}
 			\caption{Precision metric with thread relevance computed using all architectural design decision tags, for all queries.}
@@ -1421,6 +1577,17 @@ still acquired by jobs to avoid short-lived identity credential expiration.
 			\caption{NDCG metric with email relevance computed using all architectural design decision tags, for all queries.}
 			\label{fig:ndcgemailall}
 		\end{figure}
+
+\section{Discussion}
+	In this section, we'll reflect briefly on what we learned from the process of developing the tools, annotating emails, and analyzing the results of this research.
+	
+	Of course, the most obvious thing we learned, was the fact that the vast majority of content in mailing lists contains very little, if any, architectural knowledge, and even after applying numerous filtering strategies and manual cleanup, the majority of effort is spent in simply identifying emails that could possibly contain architectural knowledge, and relatively little effort is required to then determine what types of knowledge are present.
+	
+	However, our results showed that, after all the filtering steps, there are some key features which we can use as hints to help in improving the efficiency with which design decisions are identified. Figures \ref{fig:bodysize} and \ref{fig:wordcount} both clearly show a significant difference between size of architectural emails, and those that aren't. The size of an email thread is also an excellent indicator that the presence of architectural knowledge is likely, although we consider this to be of less utility, because it is often difficult for humans to quickly discern the size of a recursive email thread structure. Additionally, knowing which patterns of design decisions are most common (and having many examples of these) will make it much easier to familiarize new researchers to the concept of architectural knowledge, and makes it much easier to learn to identify them by example; at least, faster than we were able to do with our iterative "annotate and review" approach.
+	
+	A classical keyword-based search seems impractical for actually finding useful architectural knowledge, beyond the scope of research. While a good portion of the results are architecturally significant, the performance of the searches is roughly the same, no matter which query was used, and the usability of a search is greatly hindered by the simple fact of the matter that navigating email threads can be non-trivial for humans to comprehend at scale. Despite this, using keyword searches was generally efficient as a means for identifying email threads that were good candidates for categorization, as opposed to the naive approach where one would traverse the entire dataset linearly.
+	
+	Finally, the effort required to prepare the tools in a way where datasets could be easily shared and reviewed for collaboration was too great. Roughly two-thirds of the working time spent on this research was focused on the development of the prerequisite tools, and this highlights a need for standardization of software in this field, so that one high quality tool can be used for many different research projects. Otherwise, the development of novel software for each individual research project will be a massive and unnecessary time sink. We will continue to support the Email Dataset Browser and associated projects as long as they're needed by others, but we recognize the need for a more flexible web-based approach to collaborative knowledge extraction.
 
 \section{Conclusion}
 	In this study, we prepared tools to fetch and process mailing lists, and prepared a categorized dataset containing 1919 emails in 188 unique email threads, to determine what types of architectural knowledge exists in open-source software development mailing lists. The results of a varied set of analyses over this dataset tell us first and foremost that \textit{most} emails in such mailing lists do not contain useful architectural design decisions, but that a large proportion of email threads \textit{do} contain architectural design decisions. There exists a strong relationship between existence decisions and both technology and property decisions, as a natural consequence of the flow of a conversation from proposal to an evaluation of alternative solutions, to choosing an accepted solution.
